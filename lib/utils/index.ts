@@ -35,7 +35,7 @@ export function getModel(useSubModel = false) {
       'Missing environment variables for Ollama, OpenAI, Azure OpenAI, Google or Anthropic'
     )
   }
-  // Ollama
+  // Ollama q
   if (ollamaBaseUrl && ollamaModel) {
     const ollama = createOllama({ baseURL: ollamaBaseUrl })
 
