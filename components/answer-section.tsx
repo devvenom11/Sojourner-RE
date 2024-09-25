@@ -11,7 +11,7 @@ export type AnswerSectionProps = {
   hasHeader?: boolean
 }
 // Nothing
-// Updated
+// Updated ok
 export function AnswerSection({
   result,
   hasHeader = true
