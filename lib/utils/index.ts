@@ -18,6 +18,9 @@ export function getModel(useSubModel = false) {
   const openaiApiBase = process.env.OPENAI_API_BASE
   const openaiApiKey = process.env.OPENAI_API_KEY
   let openaiApiModel = process.env.OPENAI_API_MODEL || 'gpt-4o'
+  const groqApiModel=process.env.SPECIFIC_API_MODEL || 'llama3-70b-8192'
+  const groqApiBase=process.env.SPECIFIC_API_BASE
+  const groqApiKey=process.env.SPECIFIC_API_KEY
   const azureResourceName = process.env.AZURE_RESOURCE_NAME
   const azureApiKey = process.env.AZURE_API_KEY
   let azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME || 'gpt-4o'
@@ -29,13 +32,14 @@ export function getModel(useSubModel = false) {
     !openaiApiKey &&
     !googleApiKey &&
     !anthropicApiKey &&
+    !groqApiKey&&
     !(azureApiKey && azureResourceName)
   ) {
     throw new Error(
-      'Missing environment variables for Ollama, OpenAI, Azure OpenAI, Google or Anthropic'
+      'Missing environment variables for Ollama , GroqAI, Azure OpenAI, Google or Anthropic'
     )
   }
-  // Ollama q
+  // Ollama
   if (ollamaBaseUrl && ollamaModel) {
     const ollama = createOllama({ baseURL: ollamaBaseUrl })
 

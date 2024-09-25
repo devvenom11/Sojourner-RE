@@ -10,8 +10,7 @@ export type AnswerSectionProps = {
   result?: StreamableValue<string>
   hasHeader?: boolean
 }
-// Nothing
-// Updated ok
+
 export function AnswerSection({
   result,
   hasHeader = true
@@ -31,7 +30,10 @@ export function AnswerSection({
           <BotMessage content={content} />
         </Section>
       ) : (
-        <DefaultSkeleton />
+        // <DefaultSkeleton />
+        // console.log();
+
+        <div></div>
       )}
     </div>
   )
