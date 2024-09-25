@@ -27,7 +27,7 @@ export function VideoSearchSection({ result }: VideoSearchSectionProps) {
         </>
       ) : (
         <Section className="pt-2 pb-0">
-          <DefaultSkeleton pending={pending} />
+          <DefaultSkeleton />
         </Section>
       )}
     </div>

@@ -1,23 +1,23 @@
 import { Button } from '@/components/ui/button'
+import { ArrowRight } from 'lucide-react'
 
 const exampleMessages = [
   {
-    heading: 'Who is Sojourner Truth?',
-    message: 'Who is Sojourner Truth?'
+    heading: 'What is GPT-4o mini?',
+    message: 'What is GPT-4o mini?'
   },
   {
-    heading: 'What is the Bodhisattva prayer for humanity?',
-    message: 'What is the Bodhisattva prayer for humanity?'
+    heading: 'Why is Nvidia growing rapidly?',
+    message: 'Why is Nvidia growing rapidly?'
   },
   {
-    heading: 'Who is Octavia E. Butler?',
-    message: 'Who is Octavia E. Butler?'
+    heading: 'How does the Vercel AI SDK work?',
+    message: 'How does the Vercel AI SDK work?'
   },
   {
-    heading: 'Who is Sylvia Wynter?',
-    message: 'Who is Sylvia Wynter?'
+    heading: 'Tesla vs Rivian',
+    message: 'Tesla vs Rivian'
   }
-
 ]
 export function EmptyScreen({
   submitMessage,
@@ -29,17 +29,18 @@ export function EmptyScreen({
   return (
     <div className={`mx-auto w-full transition-all ${className}`}>
       <div className="bg-background p-2">
-        <div className="mt-4 flex flex-row flex-wrap justify-center items-start space-x-2 mb-4">
+        <div className="mt-4 flex flex-col items-start space-y-2 mb-4">
           {exampleMessages.map((message, index) => (
             <Button
               key={index}
-              variant="outline"
-              className="h-auto p-2 text-base rounded-md border transition-transform duration-200 ease-in-out transform hover:scale-105"
+              variant="link"
+              className="h-auto p-0 text-base"
               name={message.message}
               onClick={async () => {
                 submitMessage(message.message)
               }}
             >
+              <ArrowRight size={16} className="mr-2 text-muted-foreground" />
               {message.heading}
             </Button>
           ))}

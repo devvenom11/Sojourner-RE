@@ -8,19 +8,19 @@ import Footer from '@/components/footer'
 import { Sidebar } from '@/components/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { AppStateProvider } from '@/lib/utils/app-state'
-import GoogleTagManager from '@/components/GoogleTagManager' // Import the new component
+import { ClerkProvider } from '@clerk/nextjs'
 
 const fontSans = FontSans({
   subsets: ['latin'],
   variable: '--font-sans'
 })
 
-const title = 'Sojourner'
+const title = 'Sojourner-RE'
 const description =
-  'Sojourner For Peace, Love and Purpose An Autopoetic system aligned with the Beloved Community Pledge and the Beloved Community License.'
+  'A fully open-source AI-powered answer engine with a generative UI.'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sojourner.world'),
+  metadataBase: new URL('https://Sojourner-RE.com'),
   title,
   description,
   openGraph: {
@@ -48,26 +48,25 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* No script tags here */}
-      </head>
-      <body className={cn('font-sans antialiased', fontSans.variable)}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AppStateProvider>
-            <Header />
-            <GoogleTagManager /> {/* Use the new component */}
-            {children}
-            <Sidebar />
-            <Toaster />
-          </AppStateProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={cn('font-sans antialiased', fontSans.variable)}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AppStateProvider>
+              <Header />
+              {children}
+              <Sidebar />
+              <Footer />
+              <Toaster />
+            </AppStateProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

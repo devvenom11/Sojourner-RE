@@ -5,8 +5,10 @@ import SearchRelated from '@/components/search-related'
 import { getModel } from '../utils'
 
 export async function querySuggestor(
-  uiStream: ReturnType<typeof createStreamableUI>,
-  messages: CoreMessage[]
+  uiStream: ReturnType<typeof createStreamableUI> | any,
+  // messages: CoreMessage[]
+  messages: CoreMessage[] | any
+
 ) {
   const objectStream = createStreamableValue<PartialRelated>()
   uiStream.append(<SearchRelated relatedQueries={objectStream.value} />)

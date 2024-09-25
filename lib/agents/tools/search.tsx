@@ -41,8 +41,12 @@ export const searchTool = ({ uiStream, fullResponse }: ToolProps) =>
       const searchAPI =
         (process.env.SEARCH_API as 'tavily' | 'exa' | 'searxng') || 'tavily'
 
-      // Always set search depth to 'advanced'
-      const effectiveSearchDepth = 'advanced'
+
+      const effectiveSearchDepth =
+        searchAPI === 'searxng' &&
+          process.env.SEARXNG_DEFAULT_DEPTH === 'advanced'
+          ? 'advanced'
+          : search_depth || 'basic'
 
       console.log(
         `Using search API: ${searchAPI}, Search Depth: ${effectiveSearchDepth}`
@@ -73,14 +77,14 @@ export const searchTool = ({ uiStream, fullResponse }: ToolProps) =>
           searchResult = await (searchAPI === 'tavily'
             ? tavilySearch
             : searchAPI === 'exa'
-            ? exaSearch
-            : searxngSearch)(
-            filledQuery,
-            max_results,
-            effectiveSearchDepth,
-            include_domains,
-            exclude_domains
-          )
+              ? exaSearch
+              : searxngSearch)(
+                filledQuery,
+                max_results,
+                effectiveSearchDepth,
+                include_domains,
+                exclude_domains
+              )
         }
       } catch (error) {
         console.error('Search API error:', error)
@@ -108,7 +112,7 @@ export const searchTool = ({ uiStream, fullResponse }: ToolProps) =>
 async function tavilySearch(
   query: string,
   maxResults: number = 10,
-  searchDepth: 'basic' | 'advanced' = 'advanced',
+  searchDepth: 'basic' | 'advanced' = 'basic',
   includeDomains: string[] = [],
   excludeDomains: string[] = []
 ): Promise<SearchResults> {
@@ -129,7 +133,8 @@ async function tavilySearch(
       search_depth: searchDepth,
       include_images: true,
       include_image_descriptions: includeImageDescriptions,
-      include_answers: true,
+      include_answer: true,
+      include_follow_up_question: true,
       include_domains: includeDomains,
       exclude_domains: excludeDomains
     })
@@ -144,19 +149,21 @@ async function tavilySearch(
   const data = await response.json()
   const processedImages = includeImageDescriptions
     ? data.images
-        .map(({ url, description }: { url: string; description: string }) => ({
-          url: sanitizeUrl(url),
-          description
-        }))
-        .filter(
-          (
-            image: SearchResultImage
-          ): image is { url: string; description: string } =>
-            typeof image === 'object' &&
-            image.description !== undefined &&
-            image.description !== ''
-        )
+      .map(({ url, description }: { url: string; description: string }) => ({
+        url: sanitizeUrl(url),
+        description
+      }))
+      .filter(
+        (
+          image: SearchResultImage
+        ): image is { url: string; description: string } =>
+          typeof image === 'object' &&
+          image.description !== undefined &&
+          image.description !== ''
+      )
     : data.images.map((url: string) => sanitizeUrl(url))
+
+  console.log("Data :", data);
 
   return {
     ...data,
