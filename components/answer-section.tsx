@@ -10,6 +10,7 @@ export type AnswerSectionProps = {
   result?: StreamableValue<string>
   hasHeader?: boolean
 }
+// Nothing
 
 export function AnswerSection({
   result,
