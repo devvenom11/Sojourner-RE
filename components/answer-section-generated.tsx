@@ -7,7 +7,7 @@ export type AnswerSectionProps = {
   result: string
 }
 
-export function AnswerSectionGenerated({ result }: AnswerSectionProps) {
+export function AnswerSectionGenerated({ result }: AnswerSectionProps | any) {
   return (
     <div>
       <Section title="Answer">
