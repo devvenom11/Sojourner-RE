@@ -7,7 +7,11 @@ import { Section } from './section'
 import { ToolBadge } from './tool-badge'
 import type { SearchResults as TypeSearchResults } from '@/lib/types'
 import { useStreamableValue, StreamableValue } from 'ai/rsc'
+// import { createStreamableUI } from 'ai/rsc'
 import { AnswerSectionGenerated } from './answer-section-generated'
+import { AnswerSection } from './answer-section'
+import { FollowupPanel } from '@/components/followup-panel'
+import { inquire, researcher, taskManager, querySuggestor } from '@/lib/agents'
 
 export type SearchSectionProps = {
   result?: StreamableValue<string>
@@ -25,6 +29,15 @@ export function SearchSection({ result, includeDomains }: SearchSectionProps) {
     : ''
   console.log("Result Received", searchResults);
 
+  // const query = async () => {
+  //   const relatedQueries = await querySuggestor(uiStream, searchResults.answer)
+  //   uiStream.append(
+  //     <Section title="Follow-up">
+  //       <FollowupPanel />
+  //     </Section>
+  //   )
+  // }
+  // query()
 
   return (
     <div>

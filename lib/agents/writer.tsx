@@ -41,8 +41,6 @@ export async function writer(
           fullResponse += text
           streamableAnswer.update(fullResponse)
         }
-        console.log("streamable answer from GROQ API", result.textStream);
-
       }
     })
     .catch(err => {

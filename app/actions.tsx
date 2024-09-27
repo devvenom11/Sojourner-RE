@@ -70,15 +70,15 @@ async function submit(
   const content = skip
     ? userInput
     : formData
-      ? JSON.stringify(Object.fromEntries(formData))
-      : null
+    ? JSON.stringify(Object.fromEntries(formData))
+    : null
   const type = skip
     ? undefined
     : formData?.has('input')
-      ? 'input'
-      : formData?.has('related_query')
-        ? 'input_related'
-        : 'inquiry'
+    ? 'input'
+    : formData?.has('related_query')
+    ? 'input_related'
+    : 'inquiry'
 
   // Add the user message to the state
   if (content) {
@@ -204,8 +204,6 @@ async function submit(
         process.env.OLLAMA_MODEL && process.env.OLLAMA_BASE_URL
       )
       let processedMessages = messages
-      console.log("processedMessages", processedMessages);
-
       // If using Google provider, we need to modify the messages
       if (useGoogleProvider) {
         processedMessages = transformToolMessages(messages)
@@ -332,7 +330,7 @@ export const AI = createAI<AIState, UIState>({
     const title =
       messages.length > 0
         ? JSON.parse(messages[0].content)?.input?.substring(0, 100) ||
-        'Untitled'
+          'Untitled'
         : 'Untitled'
     // Add an 'end' message at the end to determine if the history needs to be reloaded
     const updatedMessages: AIMessage[] = [
@@ -361,9 +359,9 @@ export const getUIStateFromAIState = (aiState: Chat) => {
   const chatId = aiState.chatId
   const isSharePage = aiState.isSharePage
 
-  // Ensure messages is an array of plain objects
-  const messages = Array.isArray(aiState.messages)
-    ? aiState.messages.map(msg => ({ ...msg }))
+    // Ensure messages is an array of plain objects
+    const messages = Array.isArray(aiState.messages) 
+    ? aiState.messages.map(msg => ({...msg})) 
     : [];
 
   return messages
