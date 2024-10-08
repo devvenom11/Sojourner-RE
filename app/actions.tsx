@@ -142,7 +142,9 @@ async function submit(
 
     // If ANTHROPIC_API_KEY is set, update the UI with the answer
     // If not, update the UI with a div
-    if (process.env.ANTHROPIC_API_KEY) {
+    // if (process.env.ANTHROPIC_API_KEY) {
+    if (process.env.SPECIFIC_API_KEY) {
+
       uiStream.update(
         <AnswerSection result={streamText.value} hasHeader={false} />
       )
@@ -189,8 +191,11 @@ async function submit(
       // modify the messages to be used by the specific model
       const modifiedMessages = transformToolMessages(messages)
       const latestMessages = modifiedMessages.slice(maxMessages * -1)
+      console.log("Latest messages", latestMessages);
+
       const { response, hasError } = await writer(uiStream, latestMessages)
       answer = response
+
       errorOccurred = hasError
       messages.push({
         role: 'assistant',
@@ -204,7 +209,7 @@ async function submit(
         process.env.OLLAMA_MODEL && process.env.OLLAMA_BASE_URL
       )
       let processedMessages = messages
-      console.log("processedMessages", processedMessages);
+      console.log("processedMessages", processedMessages, '\n', messages.slice().reverse().find(m => m.role === 'assistant')?.content);
 
       // If using Google provider, we need to modify the messages
       if (useGoogleProvider) {
@@ -431,6 +436,8 @@ export const getUIStateFromAIState = (aiState: Chat) => {
           }
         case 'tool':
           try {
+            console.log("Tools call", name);
+
             const toolOutput = JSON.parse(content)
             const isCollapsed = createStreamableValue()
             isCollapsed.done(true)
@@ -459,6 +466,8 @@ export const getUIStateFromAIState = (aiState: Chat) => {
                 }
             }
           } catch (error) {
+            console.log("Error Occur in action tool :", error);
+
             return {
               id,
               component: null

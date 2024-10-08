@@ -41,9 +41,9 @@ export async function writer(
           fullResponse += text
           streamableAnswer.update(fullResponse)
         }
-        console.log("streamable answer from GROQ API", result.textStream);
 
       }
+      console.log("streamable answer from GROQ API Response Receive in stream");
     })
     .catch(err => {
       hasError = true

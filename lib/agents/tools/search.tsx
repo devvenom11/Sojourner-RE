@@ -73,7 +73,9 @@ export const searchTool = ({ uiStream, fullResponse }: ToolProps) =>
             )
           }
           searchResult = await response.json()
-        } else {
+        }
+
+        else {
           searchResult = await (searchAPI === 'tavily'
             ? tavilySearch
             : searchAPI === 'exa'
@@ -111,7 +113,7 @@ export const searchTool = ({ uiStream, fullResponse }: ToolProps) =>
 
 async function tavilySearch(
   query: string,
-  maxResults: number = 10,
+  maxResults: string = "10",
   searchDepth: 'basic' | 'advanced' = 'basic',
   includeDomains: string[] = [],
   excludeDomains: string[] = []
@@ -129,7 +131,8 @@ async function tavilySearch(
     body: JSON.stringify({
       api_key: apiKey,
       query,
-      max_results: Math.max(maxResults, 5),
+      max_results: typeof maxResults === 'number' ? String(Math.max(maxResults, 5)) : maxResults,
+      // max_results: "5",
       search_depth: searchDepth,
       include_images: true,
       include_image_descriptions: includeImageDescriptions,

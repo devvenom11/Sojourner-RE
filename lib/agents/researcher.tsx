@@ -29,14 +29,13 @@ export async function researcher(
   const answerSection = <AnswerSection result={streamableAnswer.value} />
 
   const currentDate = new Date().toLocaleString()
-  const result = await streamText({
+  const result_1 = await streamText({
     model: getModel(useSubModel),
     maxTokens: 2500,
-    system: `As a professional search expert, you possess the ability to search for any information on the web.
-    or any information on the web.
-    For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
+    system: `As a professional search expert, you possess the ability to search for any information on the web.For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
     If there are any images relevant to your answer, be sure to include them as well.
     Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
+    Remember if user search about any video provide it's videos url, images and generate answer for it after calling tool. 
     Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
     The number must always match the order of the search results.
     The retrieve tool can only be used with URLs provided by the user. URLs from search results cannot be used.
@@ -52,13 +51,45 @@ export async function researcher(
       finishReason = event.finishReason
       fullResponse = event.text
       streamableAnswer.done()
+      console.log("Groq Tool Calling Finish Reason: ", finishReason);
+
     }
   }).catch(err => {
     hasError = true
     fullResponse = 'Error: ' + err.message
     streamableText.update(fullResponse)
+    console.log("Tool Error :", fullResponse);
+
   })
 
+  const result = await streamText({
+    model: getModel(useSubModel),
+    maxTokens: 2500,
+    system: `As a professional search expert, you possess the ability to search for any information on the web.For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
+    If there are any images relevant to your answer, be sure to include them as well.
+    Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
+    Remember if user search about any video provide it's videos url, images and generate answer for it after calling tool. 
+    Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
+    The number must always match the order of the search results.
+    The retrieve tool can only be used with URLs provided by the user. URLs from search results cannot be used.
+    If it is a domain instead of a URL, specify it in the include_domains of the search tool.
+    Please match the language of the response to the user's language. Current date and time: ${currentDate}
+    `,
+    messages: processedMessages,
+    onFinish: async event => {
+      finishReason = event.finishReason
+      fullResponse = event.text
+      streamableAnswer.done()
+      console.log("Groq Tool Calling Finish Reason: ", finishReason);
+
+    }
+  }).catch(err => {
+    hasError = true
+    fullResponse = 'Error: ' + err.message
+    streamableText.update(fullResponse)
+    console.log("Tool Error :", fullResponse);
+
+  })
   // If the result is not available, return an error response
   if (!result) {
     return { result, fullResponse, hasError, toolResponses: [] }
@@ -83,6 +114,7 @@ export async function researcher(
             streamableAnswer.update(fullResponse)
           }
         }
+        // 
         break
       case 'tool-call':
         toolCalls.push(delta)
