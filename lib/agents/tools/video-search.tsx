@@ -28,9 +28,6 @@ export const videoSearchTool = ({ uiStream, fullResponse }: ToolProps) => tool({
         throw new Error('Network response was not ok')
       }
       searchResult = await response.json()
-
-      // console.log("Search Result Video-search :", searchResult);
-
     } catch (error) {
       console.error('Video Search API error:', error)
       hasError = true

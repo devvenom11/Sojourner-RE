@@ -17,10 +17,6 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
     retrieve: retrieveTool({
       uiStream,
       fullResponse
-    }),
-    videosearch: videoSearchTool({
-      uiStream,
-      fullResponse
     })
   }
 
@@ -30,7 +26,6 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
       fullResponse
     })
   }
-  // console.log("Index Tools :", tools);
 
   return tools
 }

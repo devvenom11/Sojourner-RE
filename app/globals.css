@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.cl-internal-1dauvpw {
-  display: none;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;

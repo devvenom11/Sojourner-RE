@@ -12,11 +12,6 @@ import { EmptyScreen } from './empty-screen'
 import Textarea from 'react-textarea-autosize'
 import { generateId } from 'ai'
 import { useAppState } from '@/lib/utils/app-state'
-import Head from 'next/head'
-import Image from 'next/image'
-
-// import styles from '../styles/Home.module.css'
-
 
 interface ChatPanelProps {
   messages: UIState
@@ -34,41 +29,54 @@ export function ChatPanel({ messages, query }: ChatPanelProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const isFirstRender = useRef(true) // For development environment
 
-  async function handleQuerySubmit(query: string, formData?: FormData) {
-    setInput(query)
-    setIsGenerating(true)
+  const [isButtonPressed, setIsButtonPressed] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [viewportHeight, setViewportHeight] = useState<number | undefined>(
+    undefined
+  )
+  const [viewportWidth, setViewportWidth] = useState<number | undefined>(
+    undefined
+  )
+  const [isMobile, setIsMobile] = useState(false)
 
-    // Add user message to UI state
-    setMessages(currentMessages => [
-      ...currentMessages,
-      {
-        id: generateId(),
-        component: <UserMessage message={query} />
-      }
-    ])
-
-    // Submit and get response message
-    const data = formData || new FormData()
-    if (!formData) {
-      data.append('input', query)
-    }
-    const responseMessage = await submit(data)
-    setMessages(currentMessages => [...currentMessages, responseMessage])
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    await handleQuerySubmit(input, formData)
-  }
-
-  // if query is not empty, submit the query
   useEffect(() => {
-    if (isFirstRender.current && query && query.trim().length > 0) {
-      handleQuerySubmit(query)
-      isFirstRender.current = false
+    const iOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    setIsIOS(iOS)
+    if (isButtonPressed) {
+      inputRef.current?.focus()
+      setIsButtonPressed(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isButtonPressed])
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      const width = window.visualViewport?.width ?? window.innerWidth
+      const height = window.visualViewport?.height ?? window.innerHeight
+      setViewportHeight(height)
+      setViewportWidth(width)
+      setIsMobile(width <= 768)
+    }
+
+    updateDimensions()
+    window.visualViewport?.addEventListener('resize', updateDimensions)
+    window.addEventListener('resize', updateDimensions)
+    window.addEventListener('orientationchange', updateDimensions)
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateDimensions)
+      window.removeEventListener('resize', updateDimensions)
+      window.removeEventListener('orientationchange', updateDimensions)
+    }
+  }, [])
+
+  useEffect(() => {
+    inputRef.current?.focus()
+    if (query) {
+      handleQuerySubmit(query)
+    }
   }, [query])
 
   useEffect(() => {
@@ -78,30 +86,77 @@ export function ChatPanel({ messages, query }: ChatPanelProps) {
     }
   }, [aiMessage, setIsGenerating])
 
-  // Clear messages
+  const handleQuerySubmit = async (query: string, formData?: FormData) => {
+    setInput(query)
+    setIsGenerating(true)
+
+    setMessages(currentMessages => [
+      ...currentMessages,
+      { id: generateId(), component: <UserMessage message={query} /> }
+    ])
+
+    const data = formData || new FormData()
+    if (!formData) {
+      data.append('input', query)
+    }
+
+    const responseMessage = await submit(data)
+    setMessages(currentMessages => [...currentMessages, responseMessage])
+    setInput('')
+    setHasSubmitted(true)
+    setIsGenerating(false)
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (isButtonPressed) {
+      handleClear()
+      setIsButtonPressed(false)
+    }
+    const formData = new FormData(e.currentTarget)
+    await handleQuerySubmit(input, formData)
+  }
+
   const handleClear = () => {
+    setIsButtonPressed(true)
     setIsGenerating(false)
     setMessages([])
     setAIMessage({ messages: [], chatId: '' })
-    setInput('')
-    router.push('/')
+    setInput('') // Clear the input field
+    setHasSubmitted(false)
+    router.push('/') // Navigate to the home page
   }
 
-  useEffect(() => {
-    // focus on input when the page loads
-    inputRef.current?.focus()
-  }, [])
+  const formPositionClass = isIOS
+    ? 'fixed bottom-0 left-0 right-0 mx-auto flex flex-col items-center justify-end'
+    : hasSubmitted || messages.length > 0
+    ? 'fixed bottom-8 left-0 right-0 mx-auto flex flex-col items-center justify-center'
+    : 'fixed bottom-8 left-0 right-0 mx-auto flex flex-col items-center justify-center'
 
-  // If there are messages and the new button has not been pressed, display the new Button
-  if (messages.length > 0) {
+  const imageContainerClass = isIOS
+    ? 'absolute bottom-0 left-0 right-0'
+    : 'mb-4'
+
+  const imageHeight = isIOS
+    ? '90vh'
+    : viewportHeight
+    ? `${viewportHeight * 0.7}px`
+    : '70vh'
+  const imageWidth = isIOS
+    ? '100vw'
+    : viewportWidth
+    ? `${viewportWidth * 0.5}px`
+    : '50vw'
+
+  if (hasSubmitted || messages.length > 0) {
     return (
-      <div className="fixed bottom-2 md:bottom-8 left-0 right-0 flex justify-center items-center mx-auto pointer-events-none">
+      <div className={formPositionClass}>
         <Button
           type="button"
           variant={'secondary'}
-          className="rounded-full bg-secondary/80 group transition-all hover:scale-105 pointer-events-auto"
-          onClick={() => handleClear()}
-          disabled={isGenerating}
+          className="rounded-full bg-secondary/80 group transition-all hover:scale-105"
+          onClick={handleClear}
+          disabled={isGenerating} // Disable button when generating
         >
           <span className="text-sm mr-2 group-hover:block hidden animate-in fade-in duration-300">
             New
@@ -112,105 +167,77 @@ export function ChatPanel({ messages, query }: ChatPanelProps) {
     )
   }
 
-  if (query && query.trim().length > 0) {
-    return null
-  }
-
   return (
-    <>
-      <div className="">
-        <center><Image
-          src="/icon.jpg"
-          width={50}
-          height={30}
-          sizes='(max-width: 100px) 50vw, 13vw'
-          style={{ borderRadius: 15 }}
-          alt="Icon"
-        /></center>
-
-        <h1 className="text-3xl font-bold text-center mb-4">Discover Smarter Search</h1>
-        <p className="text-lg text-gray-500 text-center">
-
-          Unlock intelligent search with Sojourner.
-        </p>
-      </div>
-
+    <div className={formPositionClass}>
       <div
-        className={
-          'fixed bottom-8 left-0 right-0 top-10 mx-auto h-screen flex flex-col items-center justify-center'
-        }
+        className={`image-container ${imageContainerClass}`}
+        style={{
+          height: imageHeight,
+          width: imageWidth,
+          backgroundImage: 'url(/icon.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center'
+        }}
+      ></div>
+      <form
+        onSubmit={handleSubmit}
+        className="w-full px-6"
+        style={{ maxWidth: isMobile ? '90vw' : '50vw', width: '100%' }}
       >
-        <form onSubmit={handleSubmit} className="max-w-2xl w-full px-6">
-          <div className="relative flex items-center w-full">
-            <Textarea
-              ref={inputRef}
-              name="input"
-              rows={1}
-              maxRows={5}
-              tabIndex={0}
-              placeholder="Ask a question..."
-              spellCheck={false}
-              value={input}
-              className="resize-none w-full min-h-12 rounded-fill bg-muted border border-input pl-4 pr-10 pt-3 pb-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'"
-              onChange={e => {
-                setInput(e.target.value)
-                setShowEmptyScreen(e.target.value.length === 0)
-              }}
-              onKeyDown={e => {
-                // Enter should submit the form
-                if (
-                  e.key === 'Enter' &&
-                  !e.shiftKey &&
-                  !e.nativeEvent.isComposing
-                ) {
-                  // Prevent the default action to avoid adding a new line
-                  if (input.trim().length === 0) {
-                    e.preventDefault()
-                    return
-                  }
+        <div
+          className="relative flex items-center justify-center w-full"
+          style={{ maxWidth: isMobile ? '90vw' : '50vw', width: '100%' }}
+        >
+          <Textarea
+            ref={inputRef}
+            name="input"
+            placeholder="Ask Sojourner anything..."
+            value={input}
+            className="leading-5 resize-none pl-8 sm:pl-10 pr-14 h-12 rounded-full bg-muted flex min-h-[70px] w-full border border-input py-6 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (
+                e.key === 'Enter' &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
+                // Prevent the default action to avoid adding a new line
+                if (input.trim().length === 0) {
                   e.preventDefault()
-                  const textarea = e.target as HTMLTextAreaElement
-                  textarea.form?.requestSubmit()
+                  return
                 }
-              }}
-              onHeightChange={height => {
-                // Ensure inputRef.current is defined
-                if (!inputRef.current) return
-
-                // The initial height and left padding is 70px and 2rem
-                const initialHeight = 70
-                // The initial border radius is 32px
-                const initialBorder = 32
-                // The height is incremented by multiples of 20px
-                const multiple = (height - initialHeight) / 20
-
-                // Decrease the border radius by 4px for each 20px height increase
-                const newBorder = initialBorder - 4 * multiple
-                // The lowest border radius will be 8px
-                inputRef.current.style.borderRadius =
-                  Math.max(8, newBorder) + 'px'
-              }}
-              onFocus={() => setShowEmptyScreen(true)}
-              onBlur={() => setShowEmptyScreen(false)}
-            />
-            <Button
-              type="submit"
-              size={'icon'}
-              variant={'ghost'}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2"
-              disabled={input.length === 0}
-            >
-              <ArrowRight size={20} />
-            </Button>
-          </div>
-          <EmptyScreen
-            submitMessage={message => {
-              setInput(message)
+                e.preventDefault()
+                const textarea = e.target as HTMLTextAreaElement
+                textarea.form?.requestSubmit()
+              }
             }}
-            className={cn(showEmptyScreen ? 'visible' : 'invisible')}
+            onHeightChange={height => {
+              if (!inputRef.current) return
+              const initialHeight = 70
+              const initialBorder = 32
+              const multiple = (height - initialHeight) / 20
+              const newBorder = initialBorder - 4 * multiple
+              inputRef.current.style.borderRadius =
+                Math.max(8, newBorder) + 'px'
+            }}
+            onFocus={() => setShowEmptyScreen(true)}
+            onBlur={() => setShowEmptyScreen(false)}
           />
-        </form>
-      </div>
-    </>
+          <Button
+            type="submit"
+            size={'icon'}
+            variant={'ghost'}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+            disabled={input.length === 0}
+          >
+            <ArrowRight size={20} />
+          </Button>
+        </div>
+        <EmptyScreen
+          submitMessage={message => setInput(message)}
+          className={cn(showEmptyScreen ? 'visible' : 'invisible')}
+        />
+      </form>
+    </div>
   )
 }
