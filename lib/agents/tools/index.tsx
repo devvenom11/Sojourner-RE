@@ -1,5 +1,4 @@
 import { createStreamableUI } from 'ai/rsc'
-import { retrieveTool } from './retrieve'
 import { searchTool } from './search'
 import { videoSearchTool } from './video-search'
 
@@ -13,10 +12,6 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
     search: searchTool({
       uiStream,
       fullResponse
-    }),
-    retrieve: retrieveTool({
-      uiStream,
-      fullResponse
     })
   }
 
@@ -26,6 +21,7 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
       fullResponse
     })
   }
+// console.log("Tools to be call");
 
   return tools
 }

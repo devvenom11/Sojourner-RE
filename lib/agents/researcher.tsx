@@ -3,6 +3,8 @@ import { CoreMessage, ToolCallPart, ToolResultPart, streamText } from 'ai'
 import { getTools } from './tools'
 import { getModel, transformToolMessages } from '../utils'
 import { AnswerSection } from '@/components/answer-section'
+import { searchWriter } from './search-writer'
+import { type } from 'os'
 
 export async function researcher(
   uiStream: ReturnType<typeof createStreamableUI>,
@@ -28,19 +30,20 @@ export async function researcher(
   const streamableAnswer = createStreamableValue<string>('')
   const answerSection = <AnswerSection result={streamableAnswer.value} />
 
+  console.log("Messages",messages);
+  
   const currentDate = new Date().toLocaleString()
   const result = await streamText({
     model: getModel(useSubModel),
     maxTokens: 2500,
     system: `As a professional search expert, you possess the ability to search for any information on the web.
-    or any information on the web.
-    For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
+    or any information on the web. For all queries except video searches, you can only use the search tool one time for each query. For video searches, use the video search tool. Therefore, choose wisely according to the user's query.
+    For each user query, utilize the search recsults to their fullest potential to provide additional information and assistance in your response.
     If there are any images relevant to your answer, be sure to include them as well.
     Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
-    Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
+    Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. 
+    Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
     The number must always match the order of the search results.
-    The retrieve tool can only be used with URLs provided by the user. URLs from search results cannot be used.
-    If it is a domain instead of a URL, specify it in the include_domains of the search tool.
     Please match the language of the response to the user's language. Current date and time: ${currentDate}
     `,
     messages: processedMessages,
@@ -49,12 +52,14 @@ export async function researcher(
       fullResponse
     }),
     onFinish: async event => {
-      finishReason = event.finishReason
-      fullResponse = event.text
-      streamableAnswer.done()
+      // finishReason = event.finishReason
+      // fullResponse = event.text
+      // streamableAnswer.done()
     }
   }).catch(err => {
     hasError = true
+    console.log("Error: " + err.message);
+    
     fullResponse = 'Error: ' + err.message
     streamableText.update(fullResponse)
   })
@@ -64,12 +69,12 @@ export async function researcher(
     return { result, fullResponse, hasError, toolResponses: [] }
   }
 
-  const hasToolResult = messages.some(message => message.role === 'tool')
-  if (!useAnthropicProvider || hasToolResult) {
-    uiStream.append(answerSection)
-  }
+  // const hasToolResult = messages.some(message => message.role === 'tool')
+  // if (hasToolResult) {
+  //   uiStream.append(answerSection)
+  // }
 
-  // Process the response
+  // // Process the response
   const toolCalls: ToolCallPart[] = []
   const toolResponses: ToolResultPart[] = []
   for await (const delta of result.fullStream) {
@@ -86,6 +91,7 @@ export async function researcher(
         break
       case 'tool-call':
         toolCalls.push(delta)
+        
         break
       case 'tool-result':
         if (!delta.result) {
@@ -110,5 +116,13 @@ export async function researcher(
     messages.push({ role: 'tool', content: toolResponses })
   }
 
-  return { result, fullResponse, hasError, toolResponses, finishReason }
+  // console.log("Tools response ",JSON.stringify(toolResponses[0]),JSON.stringify(toolResponses[0]));
+ 
+  const { response } = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
+  console.log("Writer Result searchWriter",typeof(response),typeof({response}));
+  return { result, fullResponse, hasError, toolResponses, finishReason, response }
+  // return { result, fullResponse, hasError, toolResponses, finishReason  }
+
 }
+
+

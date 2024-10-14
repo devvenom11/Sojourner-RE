@@ -19,9 +19,11 @@ export async function taskManager(messages: CoreMessage[]) {
       messages,
       schema: nextActionSchema
     })
-
+    // console.log("Task Manager Result:", typeof(result),result.object,result.finishReason);
+    
     return result
   } catch (error) {
+    console.log("Error In task Manager", error);
     console.error(error)
     return null
   }

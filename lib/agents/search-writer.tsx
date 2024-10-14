@@ -4,10 +4,10 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { AnswerSection } from '@/components/answer-section'
 import { AnswerSectionGenerated } from '@/components/answer-section-generated'
 
-
-export async function writer(
+export async function searchWriter(
   uiStream: ReturnType<typeof createStreamableUI>,
-  messages: CoreMessage[] | any 
+  messages: CoreMessage[] | any,
+  searchResults: any 
 ) {
   let fullResponse = '';
   let hasError = false;
@@ -30,6 +30,8 @@ export async function writer(
 
     Link format: [link text](url)
     Image format: ![alt snippet](imageUrl)
+
+    ${JSON.stringify(searchResults)}
     `;
 
   await streamText({

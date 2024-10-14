@@ -6,6 +6,8 @@ import type { SerperSearchResults } from '@/lib/types'
 import { StreamableValue, useStreamableValue } from 'ai/rsc'
 import { VideoSearchResults } from './video-search-results'
 import { ToolBadge } from './tool-badge'
+import { AnswerSection } from './answer-section'
+
 
 export type VideoSearchSectionProps = {
   result?: StreamableValue<string>
@@ -24,6 +26,7 @@ export function VideoSearchSection({ result }: VideoSearchSectionProps) {
           <Section title="Videos">
             <VideoSearchResults results={searchResults} />
           </Section>
+
         </>
       ) : (
         <Section className="pt-2 pb-0">

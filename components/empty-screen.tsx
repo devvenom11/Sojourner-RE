@@ -3,19 +3,19 @@ import { Button } from '@/components/ui/button'
 const exampleMessages = [
   {
     heading: 'Who is Sojourner Truth?',
-    message: 'Who is Sojourner Truth?'
+    message: 'Who is Sojourner Truth.'
   },
   {
     heading: 'What is the Bodhisattva prayer for humanity?',
-    message: 'What is the Bodhisattva prayer for humanity?'
+    message: 'What is the Bodhisattva prayer for humanity.'
   },
   {
     heading: 'Who is Octavia E. Butler?',
-    message: 'Who is Octavia E. Butler?'
+    message: 'Who is Octavia E. Butler.'
   },
   {
     heading: 'Who is Sylvia Wynter?',
-    message: 'Who is Sylvia Wynter?'
+    message: 'Who is Sylvia Wynter.'
   }
 
 ]
