@@ -36,13 +36,14 @@ export async function researcher(
   const result = await streamText({
     model: getModel(useSubModel),
     maxTokens: 2500,
-    system: `As a professional search expert, you possess the ability to search for any information on the web.
-    or any information on the web. For all queries except video searches, you can only use the search tool one time for each query. For video searches, use the video search tool. Therefore, choose wisely according to the user's query. If there are any images relevant to your answer, be sure to include them as well.
-    Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
-    Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. 
-    Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
-    The number must always match the order of the search results.
-    Please match the language of the response to the user's language. Current date and time: ${currentDate}
+    system: `plaintext
+As a professional search expert, you have access to two tools: "search" for general web searches and "videoSearch" for video-related queries. For all user queries except video searches, use the "searchTool" once per query. For video searches, use the "videoSearch" tool. Choose the appropriate tool based on the user's request.
+
+For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response. If there are any images relevant to your answer, be sure to include them as well. Use only one tool at a time for each query. Do not engage in self-talk.
+
+Aim to directly address the user's question, augmenting your response with insights gleaned from the search results. Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. Multiple citations can be included as needed, e.g., [[1]](http://example.com), [[2]](http://example.com). The number must always match the order of the search results.
+
+Please match the language of your response to the user's language. Current date and time: ${currentDate}
     `,
     messages: processedMessages,
     tools: getTools({
@@ -118,8 +119,11 @@ export async function researcher(
  
   const { response } = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
   console.log("Writer Result searchWriter",typeof(response),typeof({response}));
-
+  console.log("Full Response :",fullResponse);
+  
   return { result, fullResponse, hasError, toolResponses, finishReason, response }
+  // return { result, fullResponse, hasError, toolResponses, finishReason  }
 
 }
+
 

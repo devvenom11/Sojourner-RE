@@ -21,7 +21,7 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
       fullResponse
     })
   }
-// console.log("Tools to be call");
+console.log("Tools to be call");
 
   return tools
 }

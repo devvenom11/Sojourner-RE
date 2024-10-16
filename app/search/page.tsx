@@ -3,7 +3,7 @@ import { generateId } from 'ai'
 import { AI } from '@/app/actions'
 import { redirect } from 'next/navigation'
 
-export const maxDuration = 60
+export const maxDuration = 20
 
 export default function Page({
   searchParams

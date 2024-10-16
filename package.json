@@ -4,9 +4,9 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "dev": "next dev --turbo -p 3023",
+    "dev": "next dev --turbo -p 5001",
     "build": "next build",
-    "start": "next start -p 3023",
+    "start": "next start -p 5001",
     "lint": "next lint"
   },
   "dependencies": {
@@ -29,7 +29,6 @@
     "@tailwindcss/typography": "^0.5.12",
     "@upstash/redis": "^1.30.0",
     "ai": "^3.3.25",
-    "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "embla-carousel-react": "^8.0.0",
