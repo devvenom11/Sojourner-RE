@@ -20,7 +20,6 @@ export async function searchWriter(
     apiKey: process.env.SPECIFIC_API_KEY,
     organization: '' // optional organization
   });
-// console.log("Messages",messages);
 
   
   const systemPrompt = `As a professional writer, your job is to generate a comprehensive and informative, yet concise answer of 400 words or less for the given question based solely on the provided search results (URL and content). You must only use information from the provided search results. Use an unbiased and journalistic tone. Combine search results together into a coherent answer. Do not repeat text. If there are any images relevant to your answer, be sure to include them as well. Aim to directly address the user's question, augmenting your response with insights gleaned from the search results. 

@@ -43,6 +43,8 @@ export async function writer(
     }
   })
     .then(async result => {
+      console.log("Writer generate :",result.textStream);
+      
       for await (const text of result.textStream) {
         if (text) {
           fullResponse += text;
@@ -57,5 +59,5 @@ export async function writer(
       streamableAnswer.update(fullResponse);
     });
 
-  return { response: fullResponse, hasError };
+  return { response: "fullResponse", hasError };
 }

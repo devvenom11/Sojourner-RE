@@ -1,4 +1,3 @@
-// Import necessary modules and components
 import {
   StreamableValue,
   createAI,
@@ -16,6 +15,7 @@ import { FollowupPanel } from '@/components/followup-panel';
 
 import { inquire, researcher, taskManager, querySuggestor } from '@/lib/agents';
 import { writer } from '@/lib/agents/writer';
+import { searchWriter } from '@/lib/agents/search-writer';
 
 import { saveChat } from '@/lib/actions/chat';
 import { Chat } from '@/lib/types';
@@ -222,6 +222,8 @@ async function submit(
     if (useSpecificAPI && answer.length === 0 && !errorOccurred) {
       const modifiedMessages = transformToolMessages(messages);
       const latestMessages = modifiedMessages.slice(maxMessages * -1);
+      // console.log("Answer generation call if answer.length === 0");
+      
       const { response, hasError } = await writer(uiStream, latestMessages);
       answer = response;
       errorOccurred = hasError;
@@ -501,12 +503,12 @@ export const getUIStateFromAIState = (aiState: Chat) => {
                   component: <SearchSection result={searchResults.value} />,
                   isCollapsed: isCollapsed.value
                 };
-              case 'retrieve':
-                return {
-                  id,
-                  component: <RetrieveSection data={toolOutput} />,
-                  isCollapsed: isCollapsed.value
-                };
+              // case 'retrieve':
+              //   return {
+              //     id,
+              //     component: <RetrieveSection data={toolOutput} />,
+              //     isCollapsed: isCollapsed.value
+              //   };
               case 'videoSearch':
                 return {
                   id,

@@ -37,9 +37,7 @@ export async function researcher(
     model: getModel(useSubModel),
     maxTokens: 2500,
     system: `As a professional search expert, you possess the ability to search for any information on the web.
-    or any information on the web. For all queries except video searches, you can only use the search tool one time for each query. For video searches, use the video search tool. Therefore, choose wisely according to the user's query.
-    For each user query, utilize the search recsults to their fullest potential to provide additional information and assistance in your response.
-    If there are any images relevant to your answer, be sure to include them as well.
+    or any information on the web. For all queries except video searches, you can only use the search tool one time for each query. For video searches, use the video search tool. Therefore, choose wisely according to the user's query. If there are any images relevant to your answer, be sure to include them as well.
     Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
     Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. 
     Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
@@ -52,9 +50,9 @@ export async function researcher(
       fullResponse
     }),
     onFinish: async event => {
-      // finishReason = event.finishReason
-      // fullResponse = event.text
-      // streamableAnswer.done()
+      finishReason = event.finishReason
+      fullResponse = event.text
+      streamableAnswer.done()
     }
   }).catch(err => {
     hasError = true
@@ -69,10 +67,10 @@ export async function researcher(
     return { result, fullResponse, hasError, toolResponses: [] }
   }
 
-  // const hasToolResult = messages.some(message => message.role === 'tool')
-  // if (hasToolResult) {
-  //   uiStream.append(answerSection)
-  // }
+  const hasToolResult = messages.some(message => message.role === 'tool')
+  if (hasToolResult) {
+    uiStream.append(answerSection)
+  }
 
   // // Process the response
   const toolCalls: ToolCallPart[] = []
@@ -120,9 +118,8 @@ export async function researcher(
  
   const { response } = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
   console.log("Writer Result searchWriter",typeof(response),typeof({response}));
+
   return { result, fullResponse, hasError, toolResponses, finishReason, response }
-  // return { result, fullResponse, hasError, toolResponses, finishReason  }
 
 }
-
 
