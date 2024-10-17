@@ -1,5 +1,5 @@
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, ToolCallPart, ToolResultPart, streamText } from 'ai'
+import { CoreMessage, LanguageModelV1, ToolCallPart, ToolResultPart, streamText } from 'ai'
 import { getTools } from './tools'
 import { getModel, transformToolMessages } from '../utils'
 import { AnswerSection } from '@/components/answer-section'
@@ -34,40 +34,33 @@ export async function researcher(
   
   const currentDate = new Date().toLocaleString()
   const result = await streamText({
-    model: getModel(useSubModel),
+    model: getModel(useSubModel) as LanguageModelV1,
     maxTokens: 2500,
     system: `plaintext
-As a professional assistant with access to three tools:
+As a professional assistant with access tools:
 
-Search: For general web searches when external information is needed to answer the user's question accurately.If user query related to finding news summary, you can use this tool. Every query that requires external information should be answered using this tool.
-
+Answer Generation: Use this tool for casual conversations, greetings. Provide friendly and short answers.
+Search: To answer the user's question accurately. For Example Current news, facts, latest information.
 VideoSearch: For queries specifically requesting videos.
 
-As a professional assistant with access to three tools:
-
-Answer Generation: For generating responses based on your existing knowledge without external resources. Use this tool for casual conversations, greetings, or when you can provide a complete and helpful answer without external data. Also use this tool to provide friendly and short answers without using any external tools.
-
-Search: For general web searches when external information is needed to answer the user's question accurately.
-VideoSearch: For queries specifically requesting videos.
 Tool Usage Guidelines:
-
-Use "Answer Generation" for casual conversations, greetings, or when you can provide a complete and helpful answer without external data. In these cases, respond in a friendly and engaging manner without using any tools.
-Use "Search" when the user's question requires information beyond your current knowledge.
+Use "Answer Generation" for greetings.Respond in a friendly and engaging manner.For Example "Hi there, It's great to see you! How can I help you today?"
+Use "Search" Everytime other than greeting and video seeking.
 Use "VideoSearch" exclusively for queries explicitly seeking videos.
-Response Guidelines:
 
+Response Guidelines:
 Provide clear, detailed, and friendly answers, especially during casual interactions.
 Enhance your responses with information from search results if you've used a tool.
 Include relevant images when appropriate to support your answer.
 Use only one tool per query and avoid unnecessary tool usage.
 Do not mention or reference the tools you are using in your response.
 Avoid self-talk or meta-commentary about your actions or limitations.
-Citing Sources:
 
+Citing Sources:
 When quoting or referencing information from specific URLs, cite the source using the [number] format that matches the order of the search results.
 Multiple citations can be included as needed, e.g., [1], [2].
-Additional Instructions:
 
+Additional Instructions:
 Match the language of your response to the user's language.
 Current date and time: ${currentDate}
 

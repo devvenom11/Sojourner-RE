@@ -40,7 +40,7 @@ async function submit(
   skip?: boolean,
   retryMessages?: AIMessage[]
 ) {
-  'use server'; // Indicates server-side execution
+  'use server'; 
 
   // Get mutable AI state and create UI stream for real-time updates
   const aiState = getMutableAIState<typeof AI>();
@@ -181,7 +181,6 @@ async function submit(
     ) {
       // Use researcher agent to generate responses
       const {
-        fullResponse,
         hasError,
         toolResponses,
         finishReason,
@@ -191,12 +190,6 @@ async function submit(
       answer = response ?? '';
       toolOutputs = toolResponses;
       errorOccurred = hasError;
-
-      // Add assistant's response to messages
-      // messages.push({
-      //   role: 'assistant',
-      //   content: response
-      // });
 
       // Update AI state with tool outputs if available
       if (toolOutputs.length > 0) {
