@@ -1,10 +1,11 @@
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, LanguageModelV1, ToolCallPart, ToolResultPart, streamText } from 'ai'
+import { CoreMessage, LanguageModel, ToolCallPart, ToolResultPart, streamText } from 'ai'
 import { getTools } from './tools'
 import { getModel, transformToolMessages } from '../utils'
 import { AnswerSection } from '@/components/answer-section'
 import { searchWriter } from './search-writer'
 import { type } from 'os'
+import { log } from 'console'
 
 export async function researcher(
   uiStream: ReturnType<typeof createStreamableUI>,
@@ -30,26 +31,25 @@ export async function researcher(
   const streamableAnswer = createStreamableValue<string>('')
   const answerSection = <AnswerSection result={streamableAnswer.value} />
 
-  console.log("Messages",messages);
-  
+  console.log("Messages", messages);
+
   const currentDate = new Date().toLocaleString()
   const result = await streamText({
-    model: getModel(useSubModel) as LanguageModelV1,
+    model: getModel(useSubModel) as LanguageModel,
     maxTokens: 2500,
     system: `plaintext
-As a professional assistant with access tools:
+As a professional assistant with three access tools:
 
-Answer Generation: Use this tool for casual conversations, greetings. Provide friendly and short answers.
-Search: To answer the user's question accurately. For Example Current news, facts, latest information.
+Greeting: Use to greet or casual conversation.
+Search: To answer the user's question accurately. For Example Current news, facts, latest information or any.
 VideoSearch: For queries specifically requesting videos.
 
 Tool Usage Guidelines:
-Use "Answer Generation" for greetings.Respond in a friendly and engaging manner.For Example "Hi there, It's great to see you! How can I help you today?"
+Use "Greeting" for greetings or casual conversation.
 Use "Search" Everytime other than greeting and video seeking.
 Use "VideoSearch" exclusively for queries explicitly seeking videos.
 
 Response Guidelines:
-Provide clear, detailed, and friendly answers, especially during casual interactions.
 Enhance your responses with information from search results if you've used a tool.
 Include relevant images when appropriate to support your answer.
 Use only one tool per query and avoid unnecessary tool usage.
@@ -73,12 +73,13 @@ Current date and time: ${currentDate}
     onFinish: async event => {
       finishReason = event.finishReason
       fullResponse = event.text
-      streamableAnswer.done()
+      console.log("Full Response", fullResponse);
+      // streamableAnswer.done()
     }
   }).catch(err => {
     hasError = true
     console.log("Error: " + err.message);
-    
+
     fullResponse = 'Error: ' + err.message
     streamableText.update(fullResponse)
   })
@@ -110,7 +111,6 @@ Current date and time: ${currentDate}
         break
       case 'tool-call':
         toolCalls.push(delta)
-        
         break
       case 'tool-result':
         if (!delta.result) {
@@ -135,15 +135,15 @@ Current date and time: ${currentDate}
     messages.push({ role: 'tool', content: toolResponses })
   }
 
-  // console.log("Tools response ",JSON.stringify(toolResponses[0]),JSON.stringify(toolResponses[0]));
- 
-  const { response } = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
-  console.log("Writer Result searchWriter",typeof(response),typeof({response}));
-  console.log("Full Response :",fullResponse);
-  
+  // Ensure searchWriter is called only if toolResponses are available
+  let response = null
+  if (toolResponses.length > 0) {
+    const searchWriterResult = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
+    response = searchWriterResult.response
+    // console.log("Writer Result searchWriter", typeof (response), typeof ({ response }));
+    // console.log("Response :", response);
+    // console.log("Tool  Responses", typeof (toolResponses), toolResponses);
+  }
+
   return { result, fullResponse, hasError, toolResponses, finishReason, response }
-  // return { result, fullResponse, hasError, toolResponses, finishReason  }
-
 }
-
-

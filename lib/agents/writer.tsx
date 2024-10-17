@@ -1,5 +1,5 @@
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, LanguageModelV1, streamText } from 'ai'
+import { CoreMessage, LanguageModel, streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { AnswerSection } from '@/components/answer-section'
 import { AnswerSectionGenerated } from '@/components/answer-section-generated'
@@ -34,7 +34,7 @@ Always answer in Markdown format. Links and images must follow the correct forma
     `;
 
   await streamText({
-    model: openai!.chat(process.env.SPECIFIC_API_MODEL || 'llama3-70b-8192') as unknown as LanguageModelV1,
+    model: openai!.chat(process.env.SPECIFIC_API_MODEL || 'llama3-70b-8192') as unknown as LanguageModel,
     maxTokens: 2500,
     system: systemPrompt,
     messages,

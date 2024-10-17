@@ -1,5 +1,5 @@
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, LanguageModelV1, streamObject } from 'ai'
+import { CoreMessage, LanguageModel, streamObject } from 'ai'
 import SearchRelated from '@/components/search-related'
 import { getModel } from '../utils'
 import { z } from 'zod';
@@ -65,7 +65,7 @@ export async function querySuggestor(
 
   try {
     const result = await streamObject({
-      model: getModel() as LanguageModelV1,
+      model: getModel() as LanguageModel,
       system: `As a professional web researcher, your task is to generate a set of three queries that explore the subject matter more deeply, building upon the initial query and the information uncovered in its search results.
 
 For instance, if the original query was "Starship's third test flight key milestones", your output should follow this format:

@@ -1,6 +1,7 @@
 import { createStreamableUI } from 'ai/rsc'
 import { searchTool } from './search'
 import { videoSearchTool } from './video-search'
+import { greetingTool } from './greeting'
 
 export interface ToolProps {
   uiStream: ReturnType<typeof createStreamableUI>
@@ -10,6 +11,10 @@ export interface ToolProps {
 export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
   const tools: any = {
     search: searchTool({
+      uiStream,
+      fullResponse
+    }),
+    greeting: greetingTool({
       uiStream,
       fullResponse
     })
