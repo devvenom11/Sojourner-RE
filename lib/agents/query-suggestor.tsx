@@ -34,7 +34,7 @@ export async function querySuggestor(
       if (message.role === "user") {
         try {
           // Attempt to parse the content as JSON
-          const parsedContent = JSON.parse(message.content);
+          const parsedContent = typeof message.content === 'string' ? JSON.parse(message.content) : null;
 
           // If the message has an action and it's 'skip', ignore this message
           if (
@@ -89,7 +89,7 @@ Please match the language of the response to the user's language.`,
     for await (const obj of result.partialObjectStream) {
       if (obj.related) {
         // Transform the 'related' array into the required format
-        const relatedQueries = obj.related.map((query: string) => ({ query }));
+        const relatedQueries = obj.related.filter((query): query is string => query !== undefined).map((query: string) => ({ query }));
         // Update objectStream with the new items
         objectStream.update({ items: relatedQueries });
         // Update finalRelatedQueries

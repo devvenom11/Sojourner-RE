@@ -30,7 +30,7 @@ export function AnswerSection({
           <BotMessage content={content} />
         </Section>
       ) : (
-        <DefaultSkeleton />
+        <DefaultSkeleton pending={false} />
       )}
     </div>
   )

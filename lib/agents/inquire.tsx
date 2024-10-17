@@ -14,7 +14,8 @@ export async function inquire(
   let finalInquiry: PartialInquiry = {}
   await streamObject({
     model: getModel(),
-    system: `As a professional web researcher, your role is to deepen your understanding of the user's input by conducting further inquiries when necessary.
+    system: `As a professional web researcher, your role is to deepen your understanding of the user's input by conducting further inquiries when necessary. If there is greeting or casual conversation, you can skip this step.
+    
     After receiving an initial response from the user, carefully assess whether additional questions are absolutely essential to provide a comprehensive and accurate answer. Only proceed with further inquiries if the available information is insufficient or ambiguous.
 
     When crafting your inquiry, structure it as follows:

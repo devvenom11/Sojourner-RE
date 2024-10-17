@@ -188,7 +188,7 @@ async function submit(
         response
       } = await researcher(uiStream, streamText, messages);
       stopReason = finishReason || '';
-      answer = response;
+      answer = response ?? '';
       toolOutputs = toolResponses;
       errorOccurred = hasError;
 
