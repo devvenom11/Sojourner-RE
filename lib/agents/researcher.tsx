@@ -1,8 +1,11 @@
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, ToolCallPart, ToolResultPart, streamText } from 'ai'
+import { CoreMessage, LanguageModel, ToolCallPart, ToolResultPart, streamText } from 'ai'
 import { getTools } from './tools'
 import { getModel, transformToolMessages } from '../utils'
 import { AnswerSection } from '@/components/answer-section'
+import { searchWriter } from './search-writer'
+import { type } from 'os'
+import { log } from 'console'
 
 export async function researcher(
   uiStream: ReturnType<typeof createStreamableUI>,
@@ -28,20 +31,39 @@ export async function researcher(
   const streamableAnswer = createStreamableValue<string>('')
   const answerSection = <AnswerSection result={streamableAnswer.value} />
 
+  console.log("Messages", messages);
+
   const currentDate = new Date().toLocaleString()
   const result = await streamText({
-    model: getModel(useSubModel),
+    model: getModel(useSubModel) as LanguageModel,
     maxTokens: 2500,
-    system: `As a professional search expert, you possess the ability to search for any information on the web.
-    or any information on the web.
-    For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
-    If there are any images relevant to your answer, be sure to include them as well.
-    Aim to directly address the user's question, augmenting your response with insights gleaned from the search results.
-    Whenever quoting or referencing information from a specific URL, always explicitly cite the source URL using the [[number]](url) format. Multiple citations can be included as needed, e.g., [[number]](url), [[number]](url).
-    The number must always match the order of the search results.
-    The retrieve tool can only be used with URLs provided by the user. URLs from search results cannot be used.
-    If it is a domain instead of a URL, specify it in the include_domains of the search tool.
-    Please match the language of the response to the user's language. Current date and time: ${currentDate}
+    system: `plaintext
+As a professional assistant with three access tools:
+
+Greeting: Use to greet or casual conversation.
+Search: To answer the user's question accurately. For Example Current news, facts, latest information or any.
+VideoSearch: For queries specifically requesting videos.
+
+Tool Usage Guidelines:
+Use "Greeting" for greetings or casual conversation.
+Use "Search" Everytime other than greeting and video seeking.
+Use "VideoSearch" exclusively for queries explicitly seeking videos.
+
+Response Guidelines:
+Enhance your responses with information from search results if you've used a tool.
+Include relevant images when appropriate to support your answer.
+Use only one tool per query and avoid unnecessary tool usage.
+Do not mention or reference the tools you are using in your response.
+Avoid self-talk or meta-commentary about your actions or limitations.
+
+Citing Sources:
+When quoting or referencing information from specific URLs, cite the source using the [number] format that matches the order of the search results.
+Multiple citations can be included as needed, e.g., [1], [2].
+
+Additional Instructions:
+Match the language of your response to the user's language.
+Current date and time: ${currentDate}
+
     `,
     messages: processedMessages,
     tools: getTools({
@@ -51,10 +73,13 @@ export async function researcher(
     onFinish: async event => {
       finishReason = event.finishReason
       fullResponse = event.text
-      streamableAnswer.done()
+      console.log("Full Response", fullResponse);
+      // streamableAnswer.done()
     }
   }).catch(err => {
     hasError = true
+    console.log("Error: " + err.message);
+
     fullResponse = 'Error: ' + err.message
     streamableText.update(fullResponse)
   })
@@ -65,11 +90,11 @@ export async function researcher(
   }
 
   const hasToolResult = messages.some(message => message.role === 'tool')
-  if (!useAnthropicProvider || hasToolResult) {
+  if (hasToolResult) {
     uiStream.append(answerSection)
   }
 
-  // Process the response
+  // // Process the response
   const toolCalls: ToolCallPart[] = []
   const toolResponses: ToolResultPart[] = []
   for await (const delta of result.fullStream) {
@@ -110,5 +135,15 @@ export async function researcher(
     messages.push({ role: 'tool', content: toolResponses })
   }
 
-  return { result, fullResponse, hasError, toolResponses, finishReason }
+  // Ensure searchWriter is called only if toolResponses are available
+  let response = null
+  if (toolResponses.length > 0) {
+    const searchWriterResult = await searchWriter(uiStream, messages, JSON.stringify(toolResponses[0]))
+    response = searchWriterResult.response
+    // console.log("Writer Result searchWriter", typeof (response), typeof ({ response }));
+    // console.log("Response :", response);
+    // console.log("Tool  Responses", typeof (toolResponses), toolResponses);
+  }
+
+  return { result, fullResponse, hasError, toolResponses, finishReason, response }
 }

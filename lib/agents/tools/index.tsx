@@ -1,7 +1,7 @@
 import { createStreamableUI } from 'ai/rsc'
-import { retrieveTool } from './retrieve'
 import { searchTool } from './search'
 import { videoSearchTool } from './video-search'
+import { greetingTool } from './greeting'
 
 export interface ToolProps {
   uiStream: ReturnType<typeof createStreamableUI>
@@ -14,7 +14,7 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
       uiStream,
       fullResponse
     }),
-    retrieve: retrieveTool({
+    greeting: greetingTool({
       uiStream,
       fullResponse
     })
@@ -26,6 +26,7 @@ export const getTools = ({ uiStream, fullResponse }: ToolProps) => {
       fullResponse
     })
   }
+console.log("Tools to be call");
 
   return tools
 }

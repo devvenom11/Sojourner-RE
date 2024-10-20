@@ -2,8 +2,8 @@ export type SearchResults = {
   images: SearchResultImage[]
   results: SearchResultItem[]
   number_of_results?: number
-  query: string
-  answer?:string
+  query: string,
+  answer:string
 }
 
 // If enabled the include_images_description is true, the images will be an array of { url: string, description: string }

@@ -69,12 +69,12 @@ export function getModel(useSubModel = false) {
 
   // Fallback to OpenAI instead
   const openai = createOpenAI({
-    baseURL: openaiApiBase, // optional base URL for proxies etc.
-    apiKey: openaiApiKey, // optional API key, default to env property OPENAI_API_KEY
+    baseURL: groqApiBase, // optional base URL for proxies etc.
+    apiKey: groqApiKey, // optional API key, default to env property OPENAI_API_KEY
     organization: '' // optional organization
   })
 
-  return openai.chat(openaiApiModel)
+  return openai.chat(groqApiModel)
 }
 
 /**

@@ -1,6 +1,6 @@
 import { Copilot } from '@/components/copilot'
 import { createStreamableUI, createStreamableValue } from 'ai/rsc'
-import { CoreMessage, streamObject } from 'ai'
+import { CoreMessage, LanguageModel, streamObject } from 'ai'
 import { PartialInquiry, inquirySchema } from '@/lib/schema/inquiry'
 import { getModel } from '../utils'
 
@@ -13,8 +13,9 @@ export async function inquire(
 
   let finalInquiry: PartialInquiry = {}
   await streamObject({
-    model: getModel(),
-    system: `As a professional web researcher, your role is to deepen your understanding of the user's input by conducting further inquiries when necessary.
+    model: getModel() as LanguageModel,
+    system: `As a professional web researcher, your role is to deepen your understanding of the user's input by conducting further inquiries when necessary. If there is greeting or casual conversation, you can skip this step.
+    
     After receiving an initial response from the user, carefully assess whether additional questions are absolutely essential to provide a comprehensive and accurate answer. Only proceed with further inquiries if the available information is insufficient or ambiguous.
 
     When crafting your inquiry, structure it as follows:
@@ -29,8 +30,6 @@ export async function inquire(
       "inputLabel": "A label for the free-form input field, if allowed",
       "inputPlaceholder": "A placeholder text to guide the user's free-form input"
     }
-
-    Important: The "value" field in the options must always be in English, regardless of the user's language.
 
     For example:
     {
@@ -49,7 +48,7 @@ export async function inquire(
 
     By providing predefined options, you guide the user towards the most relevant aspects of their query, while the free-form input allows them to provide additional context or specific details not covered by the options.
     Remember, your goal is to gather the necessary information to deliver a thorough and accurate response.
-    Please match the language of the response (question, labels, inputLabel, and inputPlaceholder) to the user's language, but keep the "value" field in English.
+    Please match the language of the response to the user's language.
     `,
     messages,
     schema: inquirySchema
